@@ -3,9 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI TTS 음성 변환기</title>
+  <title>Firebase 데이터 관리 페이지</title>
   <style>
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+    }
 
     body {
       margin: 0;
@@ -33,321 +35,367 @@
     .subtitle {
       text-align: center;
       color: #777;
-      margin-bottom: 24px;
+      margin-bottom: 28px;
       font-size: 14px;
     }
 
-    .info {
-      padding: 14px;
-      margin-bottom: 20px;
-      border-radius: 14px;
-      background: #e8f5e9;
-      color: #2e7d32;
-      font-size: 14px;
-      line-height: 1.6;
-    }
-
-    .option-box {
+    .form-box {
       display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
+      grid-template-columns: 1fr 2fr auto;
       gap: 10px;
-      margin-bottom: 14px;
+      margin-bottom: 22px;
     }
 
-    select, input {
-      height: 44px;
-      padding: 0 12px;
+    input {
+      height: 46px;
+      padding: 0 14px;
       border: 1px solid #ddd;
       border-radius: 12px;
-      font-size: 14px;
+      font-size: 15px;
       outline: none;
     }
 
-    textarea {
-      width: 100%;
-      min-height: 180px;
-      resize: vertical;
-      padding: 16px;
-      border: 1px solid #ddd;
-      border-radius: 16px;
-      font-size: 16px;
-      line-height: 1.5;
-      outline: none;
-      font-family: Arial, sans-serif;
-    }
-
-    textarea:focus, select:focus, input:focus {
+    input:focus {
       border-color: #42a5f5;
       box-shadow: 0 0 0 3px rgba(66, 165, 245, 0.15);
     }
 
-    .label {
-      font-weight: bold;
-      margin-bottom: 6px;
-    }
-
-    .button-row {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    button, .download-link {
+    button {
       border: none;
       border-radius: 12px;
-      padding: 0 18px;
+      padding: 0 16px;
       height: 46px;
       font-size: 15px;
       cursor: pointer;
       transition: 0.15s;
       font-weight: bold;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
     }
 
-    button:hover, .download-link:hover {
+    button:hover {
       transform: translateY(-2px);
       opacity: 0.9;
     }
 
-    button:disabled {
-      cursor: not-allowed;
-      opacity: 0.6;
-      transform: none;
-    }
-
-    .make-btn {
+    .add-btn {
       background: #42a5f5;
       color: white;
     }
 
-    .clear-btn {
-      background: #b0bec5;
+    .refresh-btn {
+      background: #66bb6a;
+      color: white;
+      margin-bottom: 16px;
+    }
+
+    .edit-btn {
+      background: #ffca28;
+      color: #333;
+    }
+
+    .delete-btn {
+      background: #ef5350;
       color: white;
     }
 
-    .download-link {
+    .save-btn {
       background: #7e57c2;
       color: white;
     }
 
-    .hidden { display: none; }
+    .cancel-btn {
+      background: #b0bec5;
+      color: white;
+    }
 
     .status {
       min-height: 24px;
-      margin-top: 14px;
+      margin-bottom: 14px;
       color: #555;
       font-size: 14px;
     }
 
-    .result-box {
-      margin-top: 20px;
-      padding: 18px;
-      border-radius: 18px;
+    .list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 16px;
+      border-radius: 16px;
       background: #f7f9fb;
       border: 1px solid #edf1f5;
     }
 
-    audio {
-      width: 100%;
-      margin-top: 10px;
+    .item-title {
+      margin: 0 0 6px;
+      font-size: 18px;
+      font-weight: bold;
     }
 
-    .help {
-      margin-top: 12px;
-      font-size: 13px;
-      color: #777;
-      line-height: 1.6;
+    .item-content {
+      margin: 0;
+      color: #555;
+      line-height: 1.5;
+      word-break: break-all;
+    }
+
+    .item-date {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #999;
+    }
+
+    .item-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .edit-box {
+      display: grid;
+      grid-template-columns: 1fr 2fr auto auto;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .empty {
+      text-align: center;
+      padding: 30px;
+      color: #888;
+      background: #f7f9fb;
+      border-radius: 16px;
     }
 
     @media (max-width: 700px) {
-      .option-box { grid-template-columns: 1fr; }
-      .button-row { justify-content: stretch; }
-      button, .download-link { width: 100%; }
+      .form-box,
+      .item,
+      .edit-box {
+        grid-template-columns: 1fr;
+      }
+
+      .item-actions {
+        justify-content: flex-end;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>AI TTS 음성 변환기</h1>
-    <div class="subtitle">텍스트를 AI 음성 mp3 파일로 변환합니다</div>
+    <h1>Firebase 데이터 관리</h1>
+    <div class="subtitle">Realtime Database와 연결된 간단한 CRUD 웹페이지</div>
 
-    <div class="info">
-      현재 구조: GitHub Pages 화면 → Google Apps Script 서버 → OpenAI TTS API → mp3 음성 반환<br />
-      API Key는 index.html에 들어가지 않고 Apps Script의 스크립트 속성에 저장됩니다.
+    <div class="form-box">
+      <input id="titleInput" type="text" placeholder="제목 입력" />
+      <input id="contentInput" type="text" placeholder="내용 입력" />
+      <button class="add-btn" onclick="addData()">추가</button>
     </div>
 
-    <div class="option-box">
-      <select id="modelSelect">
-        <option value="tts-1">tts-1 빠른 생성</option>
-        <option value="tts-1-hd">tts-1-hd 고품질</option>
-      </select>
-
-      <select id="voiceSelect">
-        <option value="alloy">alloy</option>
-        <option value="echo">echo</option>
-        <option value="fable">fable</option>
-        <option value="onyx">onyx</option>
-        <option value="nova">nova</option>
-        <option value="shimmer">shimmer</option>
-      </select>
-
-      <input id="speedInput" type="number" min="0.25" max="4.0" step="0.05" value="1.0" placeholder="속도" />
-    </div>
-
-    <div>
-      <div class="label">변환할 텍스트</div>
-      <textarea id="textInput" placeholder="음성으로 바꿀 문장을 입력하세요. 예: 안녕하세요. 오늘은 Firebase와 OpenAI API를 활용한 웹페이지 제작을 배워보겠습니다."></textarea>
-    </div>
-
-    <div class="button-row">
-      <button class="clear-btn" id="clearBtn">초기화</button>
-      <button class="make-btn" id="makeBtn">음성 만들기</button>
-    </div>
-
+    <button class="refresh-btn" onclick="loadData()">데이터 새로고침</button>
     <div id="status" class="status"></div>
-
-    <div id="resultBox" class="result-box hidden">
-      <div class="label">생성된 음성</div>
-      <audio id="audioPlayer" controls></audio>
-      <div class="button-row">
-        <a id="downloadLink" class="download-link" href="#" download="tts-audio.mp3">mp3 다운로드</a>
-      </div>
-    </div>
-
-    <div class="help">
-      긴 문장은 생성 시간이 오래 걸릴 수 있습니다. 처음에는 짧은 문장으로 테스트해보세요.<br />
-      속도는 0.25부터 4.0까지 조절할 수 있습니다.
-    </div>
+    <div id="dataList" class="list"></div>
   </div>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxzvCeCidpIBm3Ez_AbmzTRrvzCkPa_7x-irAazDPzljPmuqjjHZOqXxfyS1vNh7tX1/exec';
+    // Firebase Realtime Database URL
+    const DATABASE_URL = 'https://kang-f4e85-default-rtdb.firebaseio.com/';
 
-    const textInput = document.getElementById('textInput');
-    const modelSelect = document.getElementById('modelSelect');
-    const voiceSelect = document.getElementById('voiceSelect');
-    const speedInput = document.getElementById('speedInput');
-    const makeBtn = document.getElementById('makeBtn');
-    const clearBtn = document.getElementById('clearBtn');
+    // 데이터를 저장할 위치입니다.
+    // Firebase 콘솔에서는 items 아래에 데이터가 저장됩니다.
+    const DATA_PATH = 'items';
+
+    const titleInput = document.getElementById('titleInput');
+    const contentInput = document.getElementById('contentInput');
+    const dataList = document.getElementById('dataList');
     const statusBox = document.getElementById('status');
-    const resultBox = document.getElementById('resultBox');
-    const audioPlayer = document.getElementById('audioPlayer');
-    const downloadLink = document.getElementById('downloadLink');
 
-    makeBtn.addEventListener('click', makeSpeech);
-    clearBtn.addEventListener('click', clearPage);
+    function setStatus(message) {
+      statusBox.textContent = message;
+    }
 
-    textInput.addEventListener('keydown', function(event) {
-      if (event.key === 'Enter' && event.ctrlKey) {
-        makeSpeech();
+    function getEndpoint(path = '') {
+      const cleanPath = path ? `/${path}` : '';
+      return `${DATABASE_URL}/${DATA_PATH}${cleanPath}.json`;
+    }
+
+    async function loadData() {
+      try {
+        setStatus('데이터를 불러오는 중입니다...');
+
+        const response = await fetch(getEndpoint());
+        const data = await response.json();
+
+        renderData(data);
+        setStatus('데이터를 불러왔습니다.');
+      } catch (error) {
+        console.error(error);
+        setStatus('데이터 불러오기에 실패했습니다. Firebase 보안 규칙을 확인하세요.');
+      }
+    }
+
+    async function addData() {
+      const title = titleInput.value.trim();
+      const content = contentInput.value.trim();
+
+      if (!title || !content) {
+        alert('제목과 내용을 모두 입력해주세요.');
+        return;
+      }
+
+      const newItem = {
+        title: title,
+        content: content,
+        createdAt: new Date().toLocaleString('ko-KR')
+      };
+
+      try {
+        setStatus('데이터를 추가하는 중입니다...');
+
+        await fetch(getEndpoint(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(newItem)
+        });
+
+        titleInput.value = '';
+        contentInput.value = '';
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        setStatus('데이터 추가에 실패했습니다.');
+      }
+    }
+
+    async function deleteData(id) {
+      const isConfirmed = confirm('정말 삭제하시겠습니까?');
+      if (!isConfirmed) return;
+
+      try {
+        setStatus('데이터를 삭제하는 중입니다...');
+
+        await fetch(getEndpoint(id), {
+          method: 'DELETE'
+        });
+
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        setStatus('데이터 삭제에 실패했습니다.');
+      }
+    }
+
+    async function updateData(id) {
+      const editTitle = document.getElementById(`edit-title-${id}`).value.trim();
+      const editContent = document.getElementById(`edit-content-${id}`).value.trim();
+
+      if (!editTitle || !editContent) {
+        alert('수정할 제목과 내용을 모두 입력해주세요.');
+        return;
+      }
+
+      const updatedItem = {
+        title: editTitle,
+        content: editContent,
+        updatedAt: new Date().toLocaleString('ko-KR')
+      };
+
+      try {
+        setStatus('데이터를 수정하는 중입니다...');
+
+        await fetch(getEndpoint(id), {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(updatedItem)
+        });
+
+        await loadData();
+      } catch (error) {
+        console.error(error);
+        setStatus('데이터 수정에 실패했습니다.');
+      }
+    }
+
+    function renderData(data) {
+      dataList.innerHTML = '';
+
+      if (!data) {
+        dataList.innerHTML = '<div class="empty">아직 저장된 데이터가 없습니다.</div>';
+        return;
+      }
+
+      const entries = Object.entries(data).reverse();
+
+      entries.forEach(([id, item]) => {
+        const div = document.createElement('div');
+        div.className = 'item';
+        div.id = `item-${id}`;
+
+        div.innerHTML = `
+          <div>
+            <p class="item-title">${escapeHTML(item.title || '')}</p>
+            <p class="item-content">${escapeHTML(item.content || '')}</p>
+            <div class="item-date">
+              생성: ${item.createdAt || '-'}
+              ${item.updatedAt ? ` / 수정: ${item.updatedAt}` : ''}
+            </div>
+          </div>
+          <div class="item-actions">
+            <button class="edit-btn" onclick="showEditForm('${id}', '${escapeForAttribute(item.title || '')}', '${escapeForAttribute(item.content || '')}')">수정</button>
+            <button class="delete-btn" onclick="deleteData('${id}')">삭제</button>
+          </div>
+        `;
+
+        dataList.appendChild(div);
+      });
+    }
+
+    function showEditForm(id, title, content) {
+      const itemBox = document.getElementById(`item-${id}`);
+
+      itemBox.innerHTML = `
+        <div class="edit-box">
+          <input id="edit-title-${id}" type="text" value="${title}" />
+          <input id="edit-content-${id}" type="text" value="${content}" />
+          <button class="save-btn" onclick="updateData('${id}')">저장</button>
+          <button class="cancel-btn" onclick="loadData()">취소</button>
+        </div>
+      `;
+    }
+
+    function escapeHTML(text) {
+      return String(text)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+    }
+
+    function escapeForAttribute(text) {
+      return escapeHTML(text).replaceAll('`', '&#096;');
+    }
+
+    // Enter 키로 데이터 추가
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Enter' && document.activeElement.tagName === 'INPUT') {
+        const activeId = document.activeElement.id;
+        if (activeId === 'titleInput' || activeId === 'contentInput') {
+          addData();
+        }
       }
     });
 
-    async function makeSpeech() {
-      const text = textInput.value.trim();
-      const model = modelSelect.value;
-      const voice = voiceSelect.value;
-      const speed = Number(speedInput.value || 1.0);
-
-      if (!text) {
-        alert('음성으로 변환할 텍스트를 입력해주세요.');
-        return;
-      }
-
-      if (speed < 0.25 || speed > 4.0) {
-        alert('속도는 0.25부터 4.0 사이로 입력해주세요.');
-        return;
-      }
-
-      try {
-        setLoading(true);
-        resultBox.classList.add('hidden');
-        statusBox.textContent = 'Apps Script 서버에 TTS 요청을 보내는 중입니다.';
-
-        const response = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            type: 'tts',
-            text: text,
-            model: model,
-            voice: voice,
-            speed: speed
-          })
-        });
-
-        const data = await response.json();
-
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        if (!data.audioBase64) {
-          throw new Error('음성 데이터를 받지 못했습니다.');
-        }
-
-        const audioUrl = base64ToAudioUrl(data.audioBase64, 'audio/mpeg');
-
-        audioPlayer.src = audioUrl;
-        downloadLink.href = audioUrl;
-        downloadLink.download = makeFileName();
-        resultBox.classList.remove('hidden');
-        statusBox.textContent = '음성 생성 완료';
-      } catch (error) {
-        console.error(error);
-        statusBox.textContent = '요청 실패';
-        alert('오류가 발생했습니다.\n\n' + error.message);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    function base64ToAudioUrl(base64, mimeType) {
-      const byteCharacters = atob(base64);
-      const byteArrays = [];
-
-      for (let offset = 0; offset < byteCharacters.length; offset += 512) {
-        const slice = byteCharacters.slice(offset, offset + 512);
-        const byteNumbers = new Array(slice.length);
-
-        for (let i = 0; i < slice.length; i++) {
-          byteNumbers[i] = slice.charCodeAt(i);
-        }
-
-        const byteArray = new Uint8Array(byteNumbers);
-        byteArrays.push(byteArray);
-      }
-
-      const blob = new Blob(byteArrays, { type: mimeType });
-      return URL.createObjectURL(blob);
-    }
-
-    function makeFileName() {
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hour = String(now.getHours()).padStart(2, '0');
-      const minute = String(now.getMinutes()).padStart(2, '0');
-      return `tts-${year}${month}${day}-${hour}${minute}.mp3`;
-    }
-
-    function setLoading(isLoading) {
-      makeBtn.disabled = isLoading;
-      makeBtn.textContent = isLoading ? '생성 중...' : '음성 만들기';
-    }
-
-    function clearPage() {
-      textInput.value = '';
-      statusBox.textContent = '';
-      audioPlayer.removeAttribute('src');
-      downloadLink.href = '#';
-      resultBox.classList.add('hidden');
-    }
+    // 페이지가 열리면 자동으로 데이터 조회
+    loadData();
   </script>
 </body>
 </html>
+
+
